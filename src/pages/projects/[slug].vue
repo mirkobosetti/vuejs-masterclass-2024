@@ -102,16 +102,23 @@ await getProject()
   </section>
 </template>
 
-<!-- <style>
+<style scoped>
 th {
-  @apply w-[100px];
+  width: 100px;
 }
 
 h2 {
-  @apply mb-4 text-lg font-semibold w-fit;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  width: fit-content;
 }
 
 .table-container {
-  @apply overflow-hidden overflow-y-auto rounded-md bg-slate-900 h-80;
+  overflow: hidden;
+  overflow-y: auto;
+  border-radius: 0.375rem;
+  background-color: #1e293b; /* Tailwind's slate-900 */
+  height: 20rem; /* 80 in Tailwind's spacing scale */
 }
-</style> -->
+</style>
