@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import { VueRouterAutoImports } from 'unplugin-vue-router'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -18,7 +19,7 @@ export default defineConfig({
         /\.vue\.[tj]sx?\?vue/, // .vue (vue-loader with experimentalInlineMatchResource enabled)
         /\.md$/ // .md
       ],
-      imports: ['vue', 'vue-router'],
+      imports: ['vue', VueRouterAutoImports],
       dts: true,
       viteOptimizeDeps: true
     }),
