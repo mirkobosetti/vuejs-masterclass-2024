@@ -4,7 +4,8 @@
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "typed-router.d.ts"
+    "typed-router.d.ts",
+    "database/types.ts"
   ],
   "exclude": [
     "src/**/__tests__/*"
