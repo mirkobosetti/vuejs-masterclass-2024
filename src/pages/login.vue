@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { login } from '@/utils/supaAuth'
+import { watchDebounced } from '@vueuse/core'
+
+const { serverError, handleServerError, realTimeErrors, handleLoginForm } = useFormErrors()
 
 const formData = ref({
   email: '',
   password: ''
 })
-
-const currentError = ref('')
 
 const router = useRouter()
 
@@ -15,9 +16,16 @@ const signin = async () => {
 
   if (!error) return router.push('/')
 
-  currentError.value =
-    error.message === 'Invalid login credentials' ? 'Invalid email or password' : error.message
+  handleServerError(error)
 }
+
+watchDebounced(
+  formData,
+  (newVal) => {
+    handleLoginForm(newVal)
+  },
+  { debounce: 1000, deep: true }
+)
 </script>
 
 <template>
@@ -41,8 +49,13 @@ const signin = async () => {
               placeholder="johndoe19@example.com"
               required
               v-model="formData.email"
-              :class="{ 'border-red-600': currentError }"
+              :class="{ 'border-red-600': serverError }"
             />
+            <ul class="text-red-600 text-sm text-start" v-if="realTimeErrors?.email.length">
+              <li class="list-disc" v-for="value in realTimeErrors.email" :key="value">
+                {{ value }}
+              </li>
+            </ul>
           </div>
           <div class="grid gap-2">
             <div class="flex items-center">
@@ -55,11 +68,16 @@ const signin = async () => {
               autocomplete
               required
               v-model="formData.password"
-              :class="{ 'border-red-600': currentError }"
+              :class="{ 'border-red-600': serverError }"
             />
+            <ul class="text-red-600 text-sm text-start" v-if="realTimeErrors?.password.length">
+              <li class="list-disc" v-for="value in realTimeErrors.password" :key="value">
+                {{ value }}
+              </li>
+            </ul>
           </div>
-          <ul class="text-red-600 text-sm text-start" v-if="currentError">
-            <li class="list-disc">{{ currentError }}</li>
+          <ul class="text-red-600 text-sm text-start" v-if="serverError">
+            <li class="list-disc">{{ serverError }}</li>
           </ul>
           <Button type="submit" class="w-full"> Login </Button>
         </form>
