@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const value = defineModel()
+
+defineEmits(['commit'])
 </script>
 
 <template>
@@ -7,5 +9,7 @@ const value = defineModel()
     type="text"
     class="w-full p-1 bg-transparent focus:outline-none focus:bg-gray-800 focus:rounded-md"
     v-model="value"
+    @blur="$emit('commit', value)"
+    @keyup.enter="($event.target as HTMLInputElement).blur()"
   />
 </template>
