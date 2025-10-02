@@ -1,8 +1,12 @@
 import type { ColumnDef } from '@tanstack/vue-table'
 import { RouterLink } from 'vue-router'
 import type { Projects } from '../supaQueries'
+import type { GroupedCollabs } from '@/types/GroupedCollabs'
+import Avatar from '@/components/ui/avatar/Avatar.vue'
+import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
+import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 
-export const columns: ColumnDef<Projects[0]>[] = [
+export const columns = (collabs: Ref<GroupedCollabs>): ColumnDef<Projects[0]>[] => [
   {
     accessorKey: 'name',
     header: () => h('div', { class: 'text-left' }, 'Name'),
@@ -28,8 +32,20 @@ export const columns: ColumnDef<Projects[0]>[] = [
     accessorKey: 'collaborators',
     header: () => h('div', { class: 'text-left' }, 'Collaborators'),
     cell: ({ row }) => {
-      const collaborators = row.getValue('collaborators') as string[]
-      return h('div', { class: 'text-left' }, collaborators?.join(', ') || 'No collaborators')
+      return h(
+        'div',
+        { class: 'text-left' },
+        collabs.value[row.original.id]?.map((collab) => {
+          return h(RouterLink, { to: `/users/${collab.username}`, key: collab.username }, () =>
+            h(Avatar, { class: 'hover:scale-110 transition-transform' }, () =>
+              h(AvatarImage, { src: collab.avatar_url || '', alt: collab.full_name })
+            )
+          )
+        }) ||
+          row.original.collaborators.map(() => {
+            return h(Avatar, { class: 'animate-pulse' }, () => h(AvatarFallback))
+          })
+      )
     }
   }
 ]
