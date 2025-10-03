@@ -3,14 +3,20 @@ const value = defineModel<'in-progress' | 'completed'>()
 
 const emits = defineEmits(['commit'])
 
+const { readonly = false } = defineProps<{
+  readonly?: boolean
+}>()
+
 const toggleStatus = () => {
+  if (readonly) return
+
   value.value = value.value === 'in-progress' ? 'completed' : 'in-progress'
   emits('commit')
 }
 </script>
 
 <template>
-  <div class="text-2xl cursor-pointer" @click="toggleStatus">
+  <div class="text-2xl" :class="{ 'cursor-pointer': !readonly }" @click="toggleStatus">
     <Transition mode="out-in" appear>
       <iconify-icon
         icon="lucide:circle-check"
