@@ -18,7 +18,7 @@ export const columns = (collabs: Ref<GroupedCollabs>): ColumnDef<Projects[0]>[] 
           class: 'text-left font-medium hover:bg-muted block w-full',
           to: `/projects/${row.original.slug}`
         },
-        row.getValue('name')
+        () => row.getValue('name')
       )
     }
   },
