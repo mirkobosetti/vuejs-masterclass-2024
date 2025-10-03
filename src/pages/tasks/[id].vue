@@ -3,7 +3,7 @@ const { id } = useRoute('/tasks/[id]').params
 
 const tasksLoader = useTasksStore()
 const { task } = storeToRefs(tasksLoader)
-const { getTask } = tasksLoader
+const { getTask, updateTask } = tasksLoader
 
 watch(
   () => task.value?.name,
@@ -20,12 +20,14 @@ const collabs = task.value?.collaborators ? await getProfilesByIds(task.value.co
   <Table v-if="task">
     <TableRow>
       <TableHead> Name </TableHead>
-      <TableCell> {{ task.name }} </TableCell>
+      <TableCell>
+        <AppInPlaceEditText v-model="task.name" @commit="updateTask" />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Description </TableHead>
       <TableCell>
-        {{ task.description || 'No description provided' }}
+        <AppInPlaceEditTextarea v-model="task.description" @commit="updateTask" />
       </TableCell>
     </TableRow>
     <TableRow>
@@ -38,7 +40,9 @@ const collabs = task.value?.collaborators ? await getProfilesByIds(task.value.co
     </TableRow>
     <TableRow>
       <TableHead> Status </TableHead>
-      <TableCell> {{ task.status }} </TableCell>
+      <TableCell>
+        <AppInPlaceEditStatus v-model="task.status" @commit="updateTask" />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Collaborators </TableHead>
