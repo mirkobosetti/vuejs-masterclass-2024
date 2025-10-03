@@ -1,23 +1,19 @@
 <script setup lang="ts">
-import { taskQuery, type Task } from '@/utils/supaQueries'
+const { id } = useRoute('/tasks/[id]').params
 
-const route = useRoute('/tasks/[id]')
-
-const task = ref<Task | null>(null)
+const tasksLoader = useTasksStore()
+const { task } = storeToRefs(tasksLoader)
+const { getTask } = tasksLoader
 
 watch(
   () => task.value?.name,
   () => (usePageStore().pageData.title = `Task: ${task.value?.name || ''}`)
 )
 
-const getTask = async () => {
-  const { data, error, status } = await taskQuery(+route.params.id)
+await getTask(id)
 
-  if (error) useErrorStore().setError({ error, customCode: status })
-  else task.value = data
-}
-
-await getTask()
+const { getProfilesByIds } = useCollabs()
+const collabs = task.value?.collaborators ? await getProfilesByIds(task.value.collaborators) : []
 </script>
 
 <template>
@@ -50,12 +46,18 @@ await getTask()
         <div class="flex">
           <Avatar
             class="-mr-4 border border-primary hover:scale-110 transition-transform"
-            v-for="collaborator in task.collaborators"
-            :key="collaborator"
+            v-for="collaborator in collabs"
+            :key="collaborator.id"
           >
-            <RouterLink class="w-full h-full flex items-center justify-center" to="">
-              <AvatarImage src="" alt="" />
-              <AvatarFallback> </AvatarFallback>
+            <RouterLink
+              class="w-full h-full flex items-center justify-center"
+              :to="{
+                name: '/users/[username]',
+                params: { username: collaborator.username }
+              }"
+            >
+              <AvatarImage :src="collaborator.avatar_url || ''" alt="" />
+              <AvatarFallback>{{ collaborator.username }}</AvatarFallback>
             </RouterLink>
           </Avatar>
         </div>
