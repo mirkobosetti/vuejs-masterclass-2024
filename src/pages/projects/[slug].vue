@@ -11,6 +11,11 @@ watch(
 )
 
 await getProject(slug)
+
+const { getProfilesByIds } = useCollabs()
+const collabs = project.value?.collaborators
+  ? await getProfilesByIds(project.value.collaborators)
+  : []
 </script>
 
 <template>
@@ -39,12 +44,18 @@ await getProject(slug)
         <div class="flex">
           <Avatar
             class="-mr-4 border border-primary hover:scale-110 transition-transform"
-            v-for="collaborator in project.collaborators"
-            :key="collaborator"
+            v-for="collaborator in collabs"
+            :key="collaborator.id"
           >
-            <RouterLink class="w-full h-full flex items-center justify-center" to="">
-              <AvatarImage src="" alt="" />
-              <AvatarFallback>{{ collaborator }}</AvatarFallback>
+            <RouterLink
+              class="w-full h-full flex items-center justify-center"
+              :to="{
+                name: '/users/[username]',
+                params: { username: collaborator.username }
+              }"
+            >
+              <AvatarImage :src="collaborator.avatar_url || ''" alt="" />
+              <AvatarFallback>{{ collaborator.username }}</AvatarFallback>
             </RouterLink>
           </Avatar>
         </div>
@@ -65,10 +76,19 @@ await getProject(slug)
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="project in project.tasks" :key="project.id">
-              <TableCell> {{ project.name }} </TableCell>
-              <TableCell> {{ project.status }} </TableCell>
-              <TableCell> {{ project.due_date }} </TableCell>
+            <TableRow v-for="task in project.tasks" :key="task.id">
+              <TableCell class="p-0">
+                <RouterLink
+                  :to="{ name: '/tasks/[id]', params: { id: task.id } }"
+                  class="text-left block hover:bg-muted p-4"
+                >
+                  {{ task.name }}
+                </RouterLink>
+              </TableCell>
+              <TableCell>
+                <AppInPlaceEditStatus readonly :model-value="task.status" />
+              </TableCell>
+              <TableCell> {{ task.due_date }} </TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -98,24 +118,3 @@ await getProject(slug)
     </div>
   </section>
 </template>
-
-<style scoped>
-th {
-  width: 100px;
-}
-
-h2 {
-  margin-bottom: 1rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  width: fit-content;
-}
-
-.table-container {
-  overflow: hidden;
-  overflow-y: auto;
-  border-radius: 0.375rem;
-  background-color: #1e293b; /* Tailwind's slate-900 */
-  height: 20rem; /* 80 in Tailwind's spacing scale */
-}
-</style>
