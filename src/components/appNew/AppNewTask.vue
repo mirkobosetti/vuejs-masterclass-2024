@@ -1,14 +1,56 @@
 <script lang="ts" setup>
 import type { CreateNewTask } from '@/types/CreateNewForm'
+import { createTaskQuery, profilesQuery, projectsQuery } from '@/utils/supaQueries'
 
 const isOpen = defineModel<boolean>()
 
-const createTask = async (formData: CreateNewTask) => {
-  await new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(console.log(formData))
-    }, 2000)
+type selectOptionsType = { label: string; value: string | number }
+
+const selectOptions = ref({
+  projects: [] as selectOptionsType[],
+  profiles: [] as selectOptionsType[]
+})
+
+const getProjectsOptions = async () => {
+  const { data: allProjects } = await projectsQuery
+
+  if (!allProjects) return
+
+  allProjects.forEach((project) => {
+    selectOptions.value.projects.push({ label: project.name, value: project.id })
   })
+}
+
+const getProfilesOptions = async () => {
+  const { data: allProfiles } = await profilesQuery
+
+  if (!allProfiles) return
+
+  allProfiles.forEach((profile) => {
+    selectOptions.value.profiles.push({ label: profile.full_name, value: profile.id })
+  })
+}
+
+const getOptions = async () => {
+  await Promise.all([getProjectsOptions(), getProfilesOptions()])
+}
+
+getOptions()
+
+const createTask = async (formData: CreateNewTask) => {
+  const task = {
+    ...formData,
+    collaborators: [formData.profile_id]
+  }
+
+  const { error } = await createTaskQuery(task)
+
+  if (error) {
+    console.error('Error creating task:', error.message)
+    return
+  }
+
+  isOpen.value = false
 }
 </script>
 
@@ -20,15 +62,30 @@ const createTask = async (formData: CreateNewTask) => {
       </SheetHeader>
 
       <div class="px-4">
-        <FormKit type="form" @submit="createTask" submit-label="Create Task">
-          <FormKit type="text" name="name" id="name" label="Name" placeholder="Enter task name" />
+        <FormKit
+          type="form"
+          @submit="createTask"
+          submit-label="Create Task"
+          :config="{
+            validationVisibility: 'submit'
+          }"
+        >
+          <FormKit
+            type="text"
+            name="name"
+            id="name"
+            label="Name"
+            placeholder="Enter task name"
+            validation="required|length:1,255"
+          />
           <FormKit
             type="select"
-            name="for"
-            id="for"
-            label="For"
+            name="profile_id"
+            id="profile_id"
+            label="User"
             placeholder="Select a user"
-            :options="[{ label: 'Item name', value: 1 }]"
+            :options="selectOptions.profiles"
+            validation="required"
           />
           <FormKit
             type="textarea"
@@ -36,14 +93,16 @@ const createTask = async (formData: CreateNewTask) => {
             id="description"
             label="Description"
             placeholder="Task description"
+            validation="length:0,500"
           />
           <FormKit
             type="select"
-            name="project"
-            id="project"
-            label="Porject"
+            name="project_id"
+            id="project_id"
+            label="Project"
             placeholder="Select a project"
-            :options="[{ label: 'Item name', value: 1 }]"
+            :options="selectOptions.projects"
+            validation="required"
           />
         </FormKit>
       </div>
