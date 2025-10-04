@@ -17,7 +17,7 @@ const toggleStatus = () => {
 
 <template>
   <div class="text-2xl" :class="{ 'cursor-pointer': !readonly }" @click="toggleStatus">
-    <Transition mode="out-in" appear>
+    <Transition name="scale" mode="out-in" appear>
       <iconify-icon
         icon="lucide:circle-check"
         class="text-green-500"
@@ -27,16 +27,3 @@ const toggleStatus = () => {
     </Transition>
   </div>
 </template>
-
-<style scoped>
-.v-enter-active,
-.v-leave-active {
-  /* transition: opacity 0.3s; */
-  transition: transform 0.1s;
-}
-.v-enter-from,
-.v-leave-to {
-  /* opacity: 0; */
-  transform: scale(0.8);
-}
-</style>
