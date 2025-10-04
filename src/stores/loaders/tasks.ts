@@ -1,4 +1,5 @@
 import {
+  deleteTaskQuery,
   taskQuery,
   tasksWithProjectsQuery,
   updateTaskQuery,
@@ -76,5 +77,9 @@ export const useTasksStore = defineStore('tasks-store', () => {
     await updateTaskQuery(taskProperties, task.value.id)
   }
 
-  return { tasks, getTasks, getTask, task, updateTask }
+  const deleteTask = async (id: number) => {
+    await deleteTaskQuery(id)
+  }
+
+  return { tasks, getTasks, getTask, task, updateTask, deleteTask }
 })
