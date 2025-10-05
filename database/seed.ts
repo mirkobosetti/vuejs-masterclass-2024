@@ -1,5 +1,15 @@
 import { fakerIT as faker } from '@faker-js/faker'
-import { createClient } from '@supabase/supabase-js'
+import { AuthError, createClient, PostgrestError } from '@supabase/supabase-js'
+
+if (!process.env.VITE_SUPABASE_URL) {
+  console.error('Have you forgot to add VITE_SUPABASE_URL to your .env file?')
+  process.exit()
+}
+
+if (!process.env.SERVICE_ROLE_KEY) {
+  console.error('Have you forgot to add SERVICE_ROLE_KEY to your .env file?')
+  process.exit()
+}
 
 // Create a single supabase client for interacting with your database
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SERVICE_ROLE_KEY)
@@ -10,14 +20,14 @@ if (!testingUserEmail) {
   process.exit()
 }
 
-const logErrorAndExit = (tableName, error) => {
+const logErrorAndExit = (tableName: string, error: AuthError | PostgrestError) => {
   console.error(
     `An error occurred in table '${tableName}' with code ${error.code}: ${error.message}`
   )
   process.exit(1)
 }
 
-const logStep = (stepMessage) => {
+const logStep = (stepMessage: string) => {
   console.log(stepMessage)
 }
 
@@ -61,7 +71,7 @@ const createPrimaryTestUser = async () => {
     logErrorAndExit('Users', error)
   }
 
-  if (data) {
+  if (data && data.user) {
     const userId = data.user.id
     await supabase.from('profiles').insert({
       id: userId,
@@ -76,7 +86,7 @@ const createPrimaryTestUser = async () => {
   }
 }
 
-const seedProjects = async (numEntries, userId) => {
+const seedProjects = async (numEntries: number, userId: string) => {
   logStep('Seeding projects...')
   const projects = []
 
@@ -101,7 +111,7 @@ const seedProjects = async (numEntries, userId) => {
   return data
 }
 
-const seedTasks = async (numEntries, projectsIds, userId) => {
+const seedTasks = async (numEntries: number, projectsIds: string[], userId: string) => {
   logStep('Seeding tasks...')
   const tasks = []
 
@@ -126,7 +136,7 @@ const seedTasks = async (numEntries, projectsIds, userId) => {
   return data
 }
 
-const seedDatabase = async (numEntriesPerTable) => {
+const seedDatabase = async (numEntriesPerTable: number) => {
   let userId
 
   const testUserId = await PrimaryTestUserExists()

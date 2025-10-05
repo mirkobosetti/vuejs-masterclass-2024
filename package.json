@@ -20,7 +20,7 @@
     "supabase:types": "npx supabase gen types typescript --project-id moahecibrueudoshbjzv --schema public > database/types.ts",
     "db:migrate:new": "supabase migration new",
     "db:reset": "supabase db reset --linked",
-    "db:seed": "node --env-file=.env database/seed.js",
+    "db:seed": "node --env-file=.env database/seed.ts",
     "db:update": "npx supabase migration up --linked"
   },
   "dependencies": {
